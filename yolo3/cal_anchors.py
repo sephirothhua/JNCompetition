@@ -73,3 +73,4 @@ print("Ratios:\n {}".format(sorted(ratios)))
 # data = sum_pics_heigth_width(os.path.join(ROOT_PATH,label_file))
 # mean = np.mean(data,axis=0)
 # print(mean)
+from keras.applications.inception_v3 import InceptionV3

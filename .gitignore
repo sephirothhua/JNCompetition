@@ -14,7 +14,11 @@ __pycache__/
 
 /yolo3/result/*
 
+/yolo3/result_upload/*
 
+/yolo3/.ipynb_checkpoints/*
+
+*.h5
 
 
 
