@@ -7,6 +7,7 @@ from mAP_cal import get_mAP
 from pycocotools.coco import COCO
 from pycocotools.cocoeval import COCOeval
 import json
+import datetime
 
 
 class MyEncoder(json.JSONEncoder):
@@ -101,46 +102,11 @@ class my_eval(COCOeval):
                 'dtIgnore':     dtIg,
             }
 
-# annFile = './data/train_0305/train_no_poly.json'
-# cocoGt=COCO(annFile)
-# data_path = './data/train_0305/restricted'
-# log_dir = 'logs/test_model/'
-# model_name = 'test_model_03091526.h5'
-# classes_path = 'model_data/danger.txt'
-# yolo = YOLO(model_path=os.path.join(log_dir,model_name),
-#             classes_path=classes_path)
-# result_list = []
-# for id in cocoGt.getImgIds():
-#     Img = cocoGt.loadImgs(id)[0]
-#     image = Image.open(os.path.join(data_path,Img['file_name']))
-#     box_result, score_result = yolo.detect(image)
-#     for i in range(box_result.shape[0]):
-#         x1,y1,x2,y2,cls=box_result[i]
-#         score = score_result[i]
-#         result_list.append({"image_id":id,"category_id":cls+1,"bbox":[float(x1),float(y1),float(x2-x1),float(y2-y1)],"score":score})
-#
-#
-# # 存储json文件
-# json_str = json.dumps(result_list,cls=MyEncoder)
-# with open('./eval/result.json', 'w') as json_file:
-#     json_file.write(json_str)
-#
-#
-# resFile='./eval/result.json'
-# cocoDt=cocoGt.loadRes(resFile)
-# imgIds=sorted(cocoGt.getImgIds())
-# cocoEval = my_eval(cocoGt,cocoDt,'bbox')
-# cocoEval.params.imgIds  = imgIds
-# cocoEval.evaluate()
-# cocoEval.accumulate()
-# cocoEval.summarize()
-
-
 def get_cocoGT(annFile):
     cocoGt = COCO(annFile)
     return cocoGt
 
-def get_result2json(cocoGt,data_path,log_dir,model_name,classes_path):
+def get_result2json(cocoGt,data_path,log_dir,model_name,classes_path,json_name):
     yolo = YOLO(model_path=os.path.join(log_dir, model_name),
                 classes_path=classes_path)
     result_list = []
@@ -156,8 +122,9 @@ def get_result2json(cocoGt,data_path,log_dir,model_name,classes_path):
                  "score": score})
     # 存储json文件
     json_str = json.dumps(result_list, cls=MyEncoder)
-    with open('./eval/result.json', 'w') as json_file:
+    with open('./eval/{}'.format(json_name), 'w') as json_file:
         json_file.write(json_str)
+    return './eval/{}'.format(json_name)
 
 
 def get_eval(cocoGt,resFile,evaltype='bbox'):
@@ -173,11 +140,12 @@ def get_eval(cocoGt,resFile,evaltype='bbox'):
 annFile = './data/train_0305/train_no_poly.json'
 data_path = './data/train_0305/restricted'
 log_dir = 'logs/test_model/'
-model_name = 'test_model_03091526.h5'
+model_name = 'test_model_03111456.h5'
 classes_path = 'model_data/danger.txt'
 resFile='./eval/result.json'
+json_name = datetime.datetime.now().strftime('%m_%d_%H_%M_%S') + '.json'
 
 if __name__ == '__main__':
     cocoGt = get_cocoGT(annFile)
-    # get_result2json(cocoGt,data_path,log_dir,model_name,classes_path)
-    get_eval(cocoGt,'./eval/result.json')
+    res_file = get_result2json(cocoGt,data_path,log_dir,model_name,classes_path,json_name)
+    get_eval(cocoGt,res_file)

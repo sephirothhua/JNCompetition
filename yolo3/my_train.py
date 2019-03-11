@@ -24,8 +24,8 @@ def _main():
     anchors_path = 'model_data/yolo_anchors.txt'
     class_names = get_classes(classes_path)
     anchors = get_anchors(anchors_path)
-    input_shape = (640,640) # multiple of 32, hw
-    model = create_model(input_shape, anchors, len(class_names),load_pretrained=True,weights_path="logs/test_model/test_model_0309.h5")
+    input_shape = (416,416) # multiple of 32, hw
+    model = create_model(input_shape, anchors, len(class_names),load_pretrained=True,weights_path="logs/test_model/test_model_03111456.h5")
     train(model, annotation_path, input_shape, anchors, len(class_names), log_dir=log_dir,negative=READ_NAGETIVE,nagetive_path=nagetive_path)
 
 def train(model, annotation_path, input_shape, anchors, num_classes, log_dir='logs/',negative=False,nagetive_path=None):
@@ -35,7 +35,7 @@ def train(model, annotation_path, input_shape, anchors, num_classes, log_dir='lo
         'yolo_loss': lambda y_true, y_pred: y_pred})
     logging = TensorBoard(log_dir=log_dir)
     checkpoint = ModelCheckpoint(log_dir + "ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5",
-        monitor='val_loss', save_weights_only=True, save_best_only=True, period=1)
+        monitor='val_loss', save_weights_only=True, save_best_only=False, period=1)
     batch_size = 2
     val_split = 0.1
     if not negative:
@@ -68,7 +68,7 @@ def train(model, annotation_path, input_shape, anchors, num_classes, log_dir='lo
                 steps_per_epoch=max(1, num_train//batch_size),
                 validation_data=data_generator_wrap(lines[num_train:], batch_size, input_shape, anchors, num_classes),
                 validation_steps=max(1, num_val//batch_size),
-                epochs=100,
+                epochs=500,
                 initial_epoch=0,
                 callbacks=[logging,checkpoint])
         model.save_weights(log_dir + 'trained_weights.h5')
@@ -77,8 +77,8 @@ def train(model, annotation_path, input_shape, anchors, num_classes, log_dir='lo
                 steps_per_epoch=max(1, (p_num_train+n_num_train)//batch_size),
                 validation_data=data_nagetive_generator_wrap(positive_lines[p_num_train:],negative_lines[n_num_train:], batch_size, input_shape, anchors, num_classes),
                 validation_steps=max(1, (p_num_val+n_num_val)//batch_size),
-                epochs=100,
-                initial_epoch=0,
+                epochs=500,
+                initial_epoch=10,
                 callbacks=[logging,checkpoint])
         model.save_weights(log_dir + 'trained_weights.h5')
 
