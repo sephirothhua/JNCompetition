@@ -1,1 +1,1 @@
-python train.py --dataset jinnan --jinnan_path  /home/shen/Documents/TianChi/classification/data/First_round_data/jinnan2_round1_train_20190305 --depth 50
+python train.py --dataset jinnan --jinnan_path  /data/Project/Tianchi/JNCompetition/yolo3/data/train_0305 --depth 50
