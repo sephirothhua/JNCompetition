@@ -211,7 +211,6 @@ class JinNanDataset(Dataset):
     def coco_label_to_label(self, coco_label):
         return self.coco_labels_inverse[coco_label]
 
-
     def label_to_coco_label(self, label):
         return self.coco_labels[label]
 

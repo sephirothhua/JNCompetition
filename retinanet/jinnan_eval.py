@@ -6,10 +6,9 @@ from pycocotools.cocoeval import COCOeval
 import numpy as np
 import json
 import os
-
 import torch
 
-def evaluate_coco(dataset, model, threshold=0.05):
+def evaluate_jinnan(dataset, model, threshold=0.05):
     
     model.eval()
     
@@ -85,5 +84,47 @@ def evaluate_coco(dataset, model, threshold=0.05):
         model.train()
 
         return
+
+def main(args=None):
+    from dataloader import JinNanDataset, Augmenter, UnNormalizer, Normalizer,Resizer
+    from torch.utils.data import Dataset, DataLoader
+    from torchvision import datasets, models, transforms
+    import model
+    import torch
+    import argparse
+
+
+    parser     = argparse.ArgumentParser(description='Simple training script for training a RetinaNet network.')
+    parser.add_argument('--dataset',default='jingnan', help='Dataset type, must be one of csv or coco.')
+    parser.add_argument('--threshold',help='treshold')
+    parser.add_argument('--dataset_path', help='Path to file containing training and validation annotations (optional, see readme)') 
+    parser.add_argument('--model_path',help=('the model path'))
+    parser.add_argument('--depth', help='Resnet depth, must be one of 18, 34, 50, 101, 152', type=int, default=50)
+    parser = parser.parse_args(args)
+
+    dataset_val=JinNanDataset(parser.dataset_path, set_name='val', transform=transforms.Compose([Normalizer(), Augmenter(), Resizer()]))
+    # Create the model
+    if parser.depth == 18:
+    	retinanet = model.resnet18(num_classes=dataset_val.num_classes(), pretrained=True)
+    elif parser.depth == 34:
+    	retinanet = model.resnet34(num_classes=dataset_val.num_classes(), pretrained=True)
+    elif parser.depth == 50:
+    	retinanet = model.resnet50(num_classes=dataset_val.num_classes(), pretrained=True)
+    elif parser.depth == 101:
+    	retinanet = model.resnet101(num_classes=dataset_val.num_classes(), pretrained=True)
+    elif parser.depth == 152:
+    	retinanet = model.resnet152(num_classes=dataset_val.num_classes(), pretrained=True)
+    else:
+    	raise ValueError('Unsupported model depth, must be one of 18, 34, 50, 101, 152')		
+
+    retinanet=torch.load(parser.model_path)
+    use_gpu = True
+
+    if use_gpu:
+        retinanet = retinanet.cuda()
+    retinanet.eval()
+    print('Evaluating dataset')
+    evaluate_jinnan(dataset_val, retinanet)
 if __name__=='__main__':
-    pass
+    main()
+    

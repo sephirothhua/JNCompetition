@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import numpy as np
 import torchvision
 import time
@@ -14,10 +15,10 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import datasets, models, transforms
 
-from dataloader import CocoDataset, CSVDataset, collater, Resizer, AspectRatioBasedSampler, Augmenter, UnNormalizer, Normalizer
+from dataloader import CocoDataset, CSVDataset, collater, Resizer, AspectRatioBasedSampler, Augmenter, UnNormalizer, Normalizer,JinNanDataset
 
 
-assert torch.__version__.split('.')[1] == '4'
+#assert torch.__version__.split('.')[1] == '4'
 
 print('CUDA available: {}'.format(torch.cuda.is_available()))
 
@@ -29,7 +30,7 @@ def main(args=None):
 	parser.add_argument('--coco_path', help='Path to COCO directory')
 	parser.add_argument('--csv_classes', help='Path to file containing class list (see readme)')
 	parser.add_argument('--csv_val', help='Path to file containing validation annotations (optional, see readme)')
-
+	parser.add_argument('--jinnan_path',help='Path to JinNan directory')
 	parser.add_argument('--model', help='Path to model (.pt) file.')
 
 	parser = parser.parse_args(args)
@@ -38,6 +39,8 @@ def main(args=None):
 		dataset_val = CocoDataset(parser.coco_path, set_name='val2017', transform=transforms.Compose([Normalizer(), Resizer()]))
 	elif parser.dataset == 'csv':
 		dataset_val = CSVDataset(train_file=parser.csv_train, class_list=parser.csv_classes, transform=transforms.Compose([Normalizer(), Resizer()]))
+	elif parser.dataset == 'jinnan':
+		dataset_val = JinNanDataset(parser.jinnan_path, set_name='val', transform=transforms.Compose([Normalizer(), Resizer()]))
 	else:
 		raise ValueError('Dataset type not understood (must be csv or coco), exiting.')
 
@@ -67,7 +70,7 @@ def main(args=None):
 			st = time.time()
 			scores, classification, transformed_anchors = retinanet(data['img'].cuda().float())
 			print('Elapsed time: {}'.format(time.time()-st))
-			idxs = np.where(scores>0.5)
+			idxs = np.where(scores.cpu().numpy()>0.5)
 			img = np.array(255 * unnormalize(data['img'][0, :, :, :])).copy()
 
 			img[img<0] = 0
@@ -91,7 +94,6 @@ def main(args=None):
 
 			cv2.imshow('img', img)
 			cv2.waitKey(0)
-
 
 
 if __name__ == '__main__':

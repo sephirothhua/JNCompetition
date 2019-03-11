@@ -19,9 +19,8 @@ import torchvision
 import model
 from anchors import Anchors
 import losses
-from dataloader import CocoDataset, CSVDataset, collater, Resizer, AspectRatioBasedSampler, Augmenter, UnNormalizer, Normalizer
+from dataloader import CocoDataset, CSVDataset, collater, Resizer, AspectRatioBasedSampler, Augmenter, UnNormalizer, Normalizer,JinNanDataset
 from torch.utils.data import Dataset, DataLoader
-from dataloader import JinNanDataset
 import coco_eval
 import csv_eval
 
@@ -169,6 +168,9 @@ def main(args=None):
 			print('Evaluating dataset')
 
 			mAP = csv_eval.evaluate(dataset_val, retinanet)
+		elif parser.dataset=='jinnan':
+			print('Evaluating dataset')
+			coco_eval.evaluate_coco(dataset_val, retinanet)
 
 		
 		scheduler.step(np.mean(epoch_loss))	
