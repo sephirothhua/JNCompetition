@@ -21,6 +21,7 @@ eval/*
 /yolo3/.ipynb_checkpoints/*
 
 *.h5
+*.hdf5
 *.json
 *.pt
 *.so
